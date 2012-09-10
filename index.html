@@ -1,0 +1,69 @@
+<html>
+<head>
+
+<!--
+	CREDITS:
+	http://0xfe.blogspot.de/2011/08/generating-tones-with-web-audio-api.html
+-->
+
+<script type="text/javascript">
+BinauralBeat = function(leftear, rightear, amplitude) {
+	this.x = 0;
+	this.y = 0;
+	this.playing = false;
+	this.left_frequency = leftear;
+	this.right_frequency = rightear;
+  this.amplitude = amplitude;
+  this.context = new webkitAudioContext();
+ 	this.sampleRate = this.context.sampleRate;
+	this.node = this.context.createJavaScriptNode(1024, 1, 2);
+	
+	var that = this;
+	this.node.onaudioprocess = function(e) { 
+	  var left = e.outputBuffer.getChannelData(0);
+		var	right = e.outputBuffer.getChannelData(1);
+
+		for (var i = 0; i < left.length; ++i) {
+			left[i] = that.amplitude * Math.sin(that.x++ / (that.sampleRate / (that.left_frequency * 2 * Math.PI)));
+		}
+
+		for (var i = 0; i < right.length; ++i) {
+			right[i] = that.amplitude * Math.sin(that.y++ / (that.sampleRate / (that.right_frequency * 2 * Math.PI)));
+		}
+	};
+};
+
+BinauralBeat.prototype.play = function() {
+  if(!this.playing) {
+  	this.node.connect(this.context.destination);
+  }
+  this.playing = !this.playing;
+};
+
+BinauralBeat.prototype.pause = function() {
+	if(this.playing)
+  	this.node.disconnect();
+  this.playing = !this.playing;
+};
+
+var bb;
+window.addEventListener('load', function() {
+	bb = new BinauralBeat(600, 440, 0.5);
+}, false);
+
+function play() {
+	bb.play();
+}
+
+function pause() {
+	bb.pause();
+}
+</script>
+
+
+</head>
+<body>
+	<a href="#" onclick="play()">Play</a>
+	<a href="#" onclick="pause()">Pause</a>
+</body>
+</html>
