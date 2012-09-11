@@ -40,40 +40,70 @@ BinauralBeat = function(leftear, rightear) {
 	this.right_panner.connect(this.context.destination);
 };
 
-BinauralBeat.prototype.play = function() {
+BinauralBeat.prototype.playpause = function() {
   if(!this.playing) {
   	this.left_osci.noteOn(0);
 		this.right_osci.noteOn(0);
-  }
-  this.playing = !this.playing;
-};
-
-BinauralBeat.prototype.pause = function() {
-	if(this.playing) {
-		this.left_osci.noteOff(0);
+  } else {
+  	this.left_osci.noteOff(0);
 		this.right_osci.noteOff(0);
-	}
+  }
   this.playing = !this.playing;
 };
 
 var bb;
 window.addEventListener('load', function() {
-	bb = new BinauralBeat(210, 220);
+	bb = new BinauralBeat(210, 220123);
 }, false);
 
-function play() {
-	bb.play();
-}
-
-function pause() {
-	bb.pause();
+function playpause() {
+	bb.playpause();
 }
 </script>
+<style type="text/css">
+#body {
+	width: 100%;
+	height: 100%;
+	position: relative;	
+}
 
+.ribbon_container {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 300px;
+	height: 300px;
+	overflow: hidden;
+}
+
+.ribbon {
+	position: absolute;
+	width: 428px;
+	height: 60px;
+	left: -95px;
+	top: 93px;
+	background-color: red;
+	border: 2px dashed yellow;
+	box-shadow: 0 0 0 3px red;
+	-webkit-transform: rotate(-45deg);
+	text-align: center;
+	font-size: 150%;
+	font-weight: 700;
+}
+
+.ribbon span {
+	font-size: 80%;
+	font-weight: 400;
+}
+</style>
 
 </head>
 <body>
-	<a href="#" onclick="play()">Play</a>
-	<a href="#" onclick="pause()">Pause</a>
+	<div class="ribbon_container">
+		<div class="ribbon">
+			Fork me on <a href="https://github.com/maltoe/html5-binaural-beats">Github</a><br />
+			<span>or meditate to <a href="#" onclick="playpause()">binaural beats</a></span>!
+		</div>
+	</div>
 </body>
 </html>
