@@ -4,51 +4,61 @@
 <!--
 	CREDITS:
 	http://0xfe.blogspot.de/2011/08/generating-tones-with-web-audio-api.html
+	http://patorjk.com/experiments/tones/
+	https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html#AudioPannerNode-section
+	https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html#AudioListener-section
 -->
 
 <script type="text/javascript">
-BinauralBeat = function(leftear, rightear, amplitude) {
-	this.x = 0;
-	this.y = 0;
+BinauralBeat = function(leftear, rightear) {
 	this.playing = false;
-	this.left_frequency = leftear;
-	this.right_frequency = rightear;
-  this.amplitude = amplitude;
-  this.context = new webkitAudioContext();
- 	this.sampleRate = this.context.sampleRate;
-	this.node = this.context.createJavaScriptNode(1024, 1, 2);
+	this.context = new webkitAudioContext();
+
+	this.context.listener.setPosition(0, 0, 0);
+	this.context.listener.setOrientation(0, 1, 0, 0, 0, 1);
+	this.context.listener.setVelocity(0, 0, 0);
+
+	this.left_panner = this.context.createPanner();
+	this.left_panner.setPosition(-1, 0, 0);
+	this.left_panner.setOrientation(1, 0, 0);
+
+	this.left_osci = this.context.createOscillator();
+	this.left_osci.type = 0;
+	this.left_osci.frequency.value = leftear;
 	
-	var that = this;
-	this.node.onaudioprocess = function(e) { 
-	  var left = e.outputBuffer.getChannelData(0);
-		var	right = e.outputBuffer.getChannelData(1);
-
-		for (var i = 0; i < left.length; ++i) {
-			left[i] = that.amplitude * Math.sin(that.x++ / (that.sampleRate / (that.left_frequency * 2 * Math.PI)));
-		}
-
-		for (var i = 0; i < right.length; ++i) {
-			right[i] = that.amplitude * Math.sin(that.y++ / (that.sampleRate / (that.right_frequency * 2 * Math.PI)));
-		}
-	};
+	this.right_panner = this.context.createPanner();
+	this.right_panner.setPosition(1, 0, 0);
+	this.right_panner.setOrientation(-1, 0, 0);
+	
+	this.right_osci = this.context.createOscillator();
+	this.right_osci.type = 0;
+	this.right_osci.frequency.value = rightear;
+		
+	this.left_osci.connect(this.left_panner);
+	this.right_osci.connect(this.right_panner);
+	this.left_panner.connect(this.context.destination);
+	this.right_panner.connect(this.context.destination);
 };
 
 BinauralBeat.prototype.play = function() {
   if(!this.playing) {
-  	this.node.connect(this.context.destination);
+  	this.left_osci.noteOn(0);
+		this.right_osci.noteOn(0);
   }
   this.playing = !this.playing;
 };
 
 BinauralBeat.prototype.pause = function() {
-	if(this.playing)
-  	this.node.disconnect();
+	if(this.playing) {
+		this.left_osci.noteOff(0);
+		this.right_osci.noteOff(0);
+	}
   this.playing = !this.playing;
 };
 
 var bb;
 window.addEventListener('load', function() {
-	bb = new BinauralBeat(600, 440, 0.5);
+	bb = new BinauralBeat(210, 220);
 }, false);
 
 function play() {
